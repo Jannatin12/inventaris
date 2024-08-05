@@ -1,0 +1,104 @@
+// app.scss
+@import 'variables';
+@import '/node_modules/bootstrap/scss/bootstrap.scss';
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: $light;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+  background-color: $light;
+}
+
+footer {
+  text-align: center;
+  background-color: $light;
+  padding: 1rem 0;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: $primary;
+  border-color: $primary;
+}
+
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+.btn-my-custom-color {
+  background-color: $my-custom-color;
+  color: #000000;
+
+  &:hover {
+    background-color: darken($my-custom-color, 10%);
+  }
+}
+
+.bg-sidebar {
+  background-color: $sidebar;
+}
+
+.custom-hr {
+  border: 0;
+  height: 2px;
+  background: #9EADBA;
+  margin: 0.5rem 0;
+}
+
+
+.form-select {
+  width: auto;
+  display: inline-block;
+}
+
+.form-control {
+  display: inline-block;
+  // width: auto;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+  border-color: #117a8b;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
