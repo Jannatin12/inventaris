@@ -9,48 +9,45 @@
       </div>
     </div>
 
-    <Modal :isVisible="showModal" title="Tambah Jenis Barang" @close="closeModal" @save="saveJenisAset">
-      <TambahJenisAset />
-    </Modal>
-
     <div class="d-flex justify-content-between align-items-center my-3">
       <div class="d-flex align-items-center">
-        <label for="entries" class="me-2">Tampilkan</label>
+        <label for="entries" class="me-2">Tampilkan entri</label>
         <select id="entries" class="form-select" style="width: auto;" v-model="entriesToShow" @change="updateEntries">
           <option :value="10">10</option>
           <option :value="25">25</option>
           <option :value="50">50</option>
           <option :value="100">100</option>
         </select>
-        <label class="ms-2">Entri</label>
       </div>
-      <div>
-        <label for="search" class="me-2">Cari</label>
-        <input type="text" id="search" class="form-control" placeholder="Ketik Kata kunci" v-model="searchQuery" />
+      <div class="row g-2 align-items-center">
+        <div class="col-auto">
+          <label for="search" class="col-form-label">Cari</label>
+        </div>
+        <div class="col-auto">
+          <input type="text" id="search" class="form-control">
+        </div>
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Jenis Barang</th>
-            <th>Pengaturan</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(aset, index) in currentEntries" :key="index">
-            <td>{{ index + 1 + (currentPage - 1) * entriesToShow }}</td>
-            <td>{{ aset.jenisBarang }}</td>
-            <td>
-              <button class="btn btn-info btn-sm me-2">Ubah</button>
-              <button class="btn btn-danger btn-sm">Hapus</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <Table>
+      <template #table-head>
+        <tr>
+          <th>No.</th>
+          <th>Jenis Barang</th>
+          <th>Pengaturan</th>
+        </tr>
+      </template>
+      <template #table-body>
+        <tr v-for="(aset, index) in currentEntries" :key="index">
+          <td>{{ index + 1 + (currentPage - 1) * entriesToShow }}</td>
+          <td>{{ aset.jenisBarang }}</td>
+          <td>
+            <button class="btn btn-info btn-sm me-2">Ubah</button>
+            <button class="btn btn-danger btn-sm">Hapus</button>
+          </td>
+        </tr>
+      </template>
+    </Table>
 
     <div class="d-flex justify-content-between align-items-center">
       <div>Menampilkan {{ currentEntries.length }} dari {{ totalEntries }} entri</div>
@@ -69,12 +66,18 @@
       </nav>
     </div>
   </div>
+
+  <Modal :isVisible="showModal" title="Tambah Jenis Barang" @close="closeModal" @save="saveJenisAset">
+    <div>
+      <label for="namaBarang" class="form-label me-4">Nama Jenis Barang</label>
+      <input type="text" id="namaBarang" class="form-control">
+    </div>
+  </Modal>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import TambahJenisAset from '~/components/TambahJenisAset.vue';
 import Modal from '~/components/Modal.vue';
 
 const searchQuery = ref('');
@@ -122,5 +125,4 @@ const saveJenisAset = () => {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

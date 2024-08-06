@@ -11,51 +11,54 @@
 
     <div class="d-flex justify-content-between align-items-center my-3">
       <div class="d-flex align-items-center">
-        <label for="entries" class="me-2">Tampilkan</label>
+        <label for="entries" class="me-2">Tampilkan entri</label>
         <select id="entries" class="form-select" style="width: auto;" v-model="entriesToShow" @change="updateEntries">
           <option :value="10">10</option>
           <option :value="25">25</option>
           <option :value="50">50</option>
           <option :value="100">100</option>
         </select>
-        <label class="ms-2">Entri</label>
       </div>
-      <div>
-        <label for="" class="me-2">Cari</label>
-        <input type="text" class="form-control" placeholder="Ketik Kata kunci" v-model="searchQuery" />
+      <div class="row g-2 align-items-center">
+        <div class="col-auto">
+          <label for="search" class="col-form-label">Cari</label>
+        </div>
+        <div class="col-auto">
+          <input type="text" id="search" class="form-control">
+        </div>
       </div>
     </div>
-    <div class="table-responsive">
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Nama Barang</th>
-            <th>Merek</th>
-            <th>Tipe</th>
-            <th>Serial Number</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(aset, index) in currentEntries" :key="index">
-            <td>{{ index + 1 + (currentPage - 1) * entriesToShow }}</td>
-            <td>{{ aset.nama }}</td>
-            <td>{{ aset.merek }}</td>
-            <td>{{ aset.tipe }}</td>
-            <td>{{ aset.serialNumber }}</td>
-            <td>
-              <button class="btn btn-info btn-sm me-2">
-                <font-awesome-icon :icon="['fas', 'search']" />
-              </button>
-              <button class="btn btn-danger btn-sm">
-                <font-awesome-icon :icon="['fas', 'trash']" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+
+    <Table>
+      <template #table-head>
+        <tr>
+          <th>No.</th>
+          <th>Nama Barang</th>
+          <th>Merek</th>
+          <th>Tipe</th>
+          <th>Serial Number</th>
+          <th>Aksi</th>
+        </tr>
+      </template>
+      <template #table-body>
+        <tr v-for="(aset, index) in currentEntries" :key="index">
+          <td>{{ index + 1 + (currentPage - 1) * entriesToShow }}</td>
+          <td>{{ aset.nama }}</td>
+          <td>{{ aset.merek }}</td>
+          <td>{{ aset.tipe }}</td>
+          <td>{{ aset.serialNumber }}</td>
+          <td>
+            <button class="btn btn-info btn-sm me-2">
+              <font-awesome-icon :icon="['fas', 'search']" />
+            </button>
+            <button class="btn btn-danger btn-sm">
+              <font-awesome-icon :icon="['fas', 'trash']" />
+            </button>
+          </td>
+        </tr>
+      </template>
+    </Table>
+
     <div class="d-flex justify-content-between align-items-center">
       <div>Menampilkan {{ currentEntries.length }} dari {{ totalEntries }} entri</div>
       <nav>
@@ -148,11 +151,6 @@
             <textarea id="keterangan" class="form-control" v-model="newAsset.keterangan"></textarea>
           </div>
         </div>
-
-        <div class="d-flex justify-content-between mt-4">
-          <button class="btn btn-danger" type="button" @click="closeModal">Kembali</button>
-          <button class="btn btn-primary text-white" type="submit">Simpan</button>
-        </div>
       </form>
     </Modal>
   </div>
@@ -161,7 +159,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import Modal from '~/components/Modal.vue';
 
 const searchQuery = ref('');
 const entriesToShow = ref(10);
@@ -214,6 +211,7 @@ const updateEntries = () => {
 };
 
 const closeModal = () => {
+  console.log('close modal');
   showModal.value = false;
   resetForm();
 };
@@ -235,48 +233,11 @@ const resetForm = () => {
 };
 
 const saveData = () => {
+  console.log('save data', newAsset.value);
   assets.value.push({ ...newAsset.value });
   closeModal();
 };
 </script>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background: white;
-    padding: 1rem;
-    border-radius: 10px;
-    width: 900px;
-}
-
-.modal-header {
-  display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #dee2e6;
-    padding: 1rem;
-    border-top-left-radius: 0.3rem;
-    border-top-right-radius: 0.3rem;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #dee2e6;
-    padding: 1rem;
-    border-bottom-left-radius: 0.3rem;
-    border-bottom-right-radius: 0.3rem;
-  }
 </style>

@@ -39,24 +39,15 @@ const close = () => {
 
 <style scoped>
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1050;
 }
 
 .modal-content {
   background: white;
   padding: 1rem;
-  border-radius: 10px;
-  width: 800px;
-  height: 700px;
 }
 
 .modal-header {
