@@ -50,6 +50,7 @@ const close = () => {
   padding: 1rem;
 }
 
+
 .modal-header {
   display: flex;
   justify-content: start;

@@ -1,10 +1,12 @@
 <template>
   <div class="container mt-4">
     <div class="row mb-3">
-      <h1 class="col-sm-2">Jenis Aset</h1>
+      <h1 class="col-sm-2">Aset</h1>
       <div class="col-sm-10 text-end">
-        <button class="btn btn-primary text-white" @click="showModal = true">
-          <font-awesome-icon :icon="['fas', 'plus']" class="me-2 text-white" /> TAMBAH
+        <button class="btn btn-primary">
+          <NuxtLink to="/aset/tambah-aset" class="btn-add text-white">
+            <font-awesome-icon :icon="['fas', 'plus']" class="me-2" /> Tambah
+          </NuxtLink>
         </button>
       </div>
     </div>
@@ -33,17 +35,27 @@
       <template #table-head>
         <tr>
           <th>No.</th>
-          <th>Jenis Barang</th>
-          <th>Pengaturan</th>
+          <th>Nama Barang</th>
+          <th>Merek</th>
+          <th>Tipe</th>
+          <th>Serial Number</th>
+          <th>Aksi</th>
         </tr>
       </template>
       <template #table-body>
         <tr v-for="(aset, index) in currentEntries" :key="index">
           <td>{{ index + 1 + (currentPage - 1) * entriesToShow }}</td>
-          <td>{{ aset.jenisBarang }}</td>
+          <td>{{ aset.nama }}</td>
+          <td>{{ aset.merek }}</td>
+          <td>{{ aset.tipe }}</td>
+          <td>{{ aset.serialNumber }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2">Ubah</button>
-            <button class="btn btn-danger btn-sm">Hapus</button>
+            <button class="btn btn-info btn-sm me-2">
+              <font-awesome-icon :icon="['fas', 'search']" />
+            </button>
+            <button class="btn btn-danger btn-sm">
+              <font-awesome-icon :icon="['fas', 'trash']" />
+            </button>
           </td>
         </tr>
       </template>
@@ -66,29 +78,20 @@
       </nav>
     </div>
   </div>
-
-  <Modal :isVisible="showModal" title="Tambah Jenis Barang" @close="closeModal" @save="saveJenisAset">
-    <div>
-      <label for="namaBarang" class="form-label me-4">Nama Jenis Barang</label>
-      <input type="text" id="namaBarang" class="form-control">
-    </div>
-  </Modal>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import Modal from '~/components/Modal.vue';
 
 const searchQuery = ref('');
 const entriesToShow = ref(10);
 const currentPage = ref(1);
-const showModal = ref(false);
 
 const assets = ref([
-  { jenisBarang: 'Laptop' },
-  { jenisBarang: 'Handphone' },
-  { jenisBarang: 'Proyektor' },
+  { nama: 'Laptop', merek: 'Asus', tipe: 'Vivobook Pro 14x OLED', serialNumber: 'VF7LQLDT' },
+  { nama: 'Handphone', merek: 'Apple', tipe: 'Iphone 13 Pro Max 256 GB', serialNumber: '85309958349058908345908' },
+  { nama: 'Proyektor', merek: 'In Focus', tipe: 'IN112', serialNumber: 'P120Y3K7012' },
 ]);
 
 const totalEntries = computed(() => filteredAssets.value.length);
@@ -116,13 +119,8 @@ const updateEntries = () => {
   currentPage.value = 1;
 };
 
-const closeModal = () => {
-  showModal.value = false;
-};
-
-const saveJenisAset = () => {
-  showModal.value = false;
-};
 </script>
 
-<style scoped></style>
+<style scoped>
+
+</style>
