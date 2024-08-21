@@ -11,10 +11,14 @@
       </div>
     </div>
 
+    <div v-if="notificationState.message" :class="`alert alert-${notificationState.type} mt-3`">
+      {{ notificationState.message }}
+    </div>
+
     <div class="d-flex justify-content-between align-items-center my-3">
       <div class="d-flex align-items-center">
         <label for="entries" class="me-2">Tampilkan entri</label>
-        <select id="entries" class="form-select" style="width: auto;" v-model="entriesToShow" @change="updateEntries">
+        <select id="entries" class="form-select" style="width: auto;" v-model="entriesToShow" @change="resetCurrentPage">
           <option :value="10">10</option>
           <option :value="25">25</option>
           <option :value="50">50</option>
@@ -44,8 +48,12 @@
           <td>{{ index + 1 + (currentPage - 1) * entriesToShow }}</td>
           <td>{{ aset.nama }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2">Ubah</button>
-            <button class="btn btn-danger btn-sm">Hapus</button>
+            <NuxtLink :to="{
+              path: '/jenis-aset/tambah-jenis-aset',
+              query: { index: index }
+            }" class="btn btn-info btn-sm me-2">Ubah
+            </NuxtLink>
+            <button class="btn btn-danger btn-sm" @click="confirmDelete(index)">Hapus</button>
           </td>
         </tr>
       </template>
@@ -72,17 +80,15 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { useTypeAssetStore } from '~/stores/typeAssetStore';
 
 const searchQuery = ref('');
 const entriesToShow = ref(10);
 const currentPage = ref(1);
+const notificationState = ref({ message: '', type: '' });
 
-const typeAssets = ref([
-  { nama: 'Laptop' },
-  { nama: 'Handphone' },
-  { nama: 'Proyektor' },
-]);
+const typeAssetStore = useTypeAssetStore();
+const typeAssets = computed(() => typeAssetStore.getTypeAssets());
 
 const totalEntries = computed(() => filteredAssets.value.length);
 const totalPages = computed(() => Math.ceil(totalEntries.value / entriesToShow.value));
@@ -96,17 +102,28 @@ const currentEntries = computed(() => {
 const filteredAssets = computed(() => {
   if (!searchQuery.value) return typeAssets.value;
   return typeAssets.value.filter(asset =>
-    Object.values(asset).some(value => value.toLowerCase().includes(searchQuery.value.toLowerCase()))
+    asset.nama.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
 const changePage = (page: number) => {
-  if (page < 1 || page > totalPages.value) return;
-  currentPage.value = page;
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
 };
 
-const updateEntries = () => {
+const resetCurrentPage = () => {
   currentPage.value = 1;
+};
+
+const confirmDelete = (index: number) => {
+  if (confirm('Apakah Anda yakin ingin menghapus aset ini?')) {
+    typeAssetStore.deleteTypeAsset(index);
+    notificationState.value = { message: 'Jenis Aset berhasil dihapus!', type: 'success' };
+    setTimeout(() => {
+      notificationState.value.message = '';
+    }, 1500);
+  }
 };
 </script>
 

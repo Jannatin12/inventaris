@@ -3,18 +3,21 @@
     <div class="row mb-3">
       <h1 class="col-sm-2">Aset</h1>
       <div class="col-sm-10 text-end">
-        <button class="btn btn-primary">
-          <NuxtLink to="/aset/tambah-aset" class="btn-add text-white">
-            <font-awesome-icon :icon="['fas', 'plus']" class="me-2" /> Tambah
-          </NuxtLink>
-        </button>
+        <NuxtLink to="/aset/tambah-aset" class="btn btn-primary text-white">
+          <font-awesome-icon :icon="['fas', 'plus']" class="me-2" /> Tambah
+        </NuxtLink>
       </div>
+    </div>
+
+    <div v-if="notificationState.message" :class="`alert alert-${notificationState.type} mt-3`">
+      {{ notificationState.message }}
     </div>
 
     <div class="d-flex justify-content-between align-items-center my-3">
       <div class="d-flex align-items-center">
         <label for="entries" class="me-2">Tampilkan entri</label>
-        <select id="entries" class="form-select" style="width: auto;" v-model="entriesToShow" @change="updateEntries">
+        <select id="entries" class="form-select" style="width: auto;" v-model="entriesToShow"
+          @change="resetCurrentPage">
           <option :value="10">10</option>
           <option :value="25">25</option>
           <option :value="50">50</option>
@@ -26,7 +29,7 @@
           <label for="search" class="col-form-label">Cari</label>
         </div>
         <div class="col-auto">
-          <input type="text" id="search" class="form-control">
+          <input type="text" id="search" class="form-control" v-model="searchQuery" @input="resetCurrentPage" />
         </div>
       </div>
     </div>
@@ -39,6 +42,8 @@
           <th>Merek</th>
           <th>Tipe</th>
           <th>Serial Number</th>
+          <th>Status Garansi</th>
+          <th>Umur Barang</th>
           <th>Aksi</th>
         </tr>
       </template>
@@ -49,30 +54,43 @@
           <td>{{ aset.merek }}</td>
           <td>{{ aset.tipe }}</td>
           <td>{{ aset.serialNumber }}</td>
+          <td>{{ getStatusGaransi(aset.akhirGaransi) }}</td>
+          <td>{{ aset.umurBarang }}</td>
           <td>
-            <button class="btn btn-info btn-sm me-2">
-              <font-awesome-icon :icon="['fas', 'search']" />
-            </button>
-            <button class="btn btn-danger btn-sm">
-              <font-awesome-icon :icon="['fas', 'trash']" />
+            <NuxtLink :to="{
+              path: '/aset/tambah-aset',
+              query: { index: getAssetIndex(aset) },
+            }" class="btn btn-info btn-sm me-2">
+              Ubah
+            </NuxtLink>
+            <button class="btn btn-danger btn-sm" @click="confirmDelete(getAssetIndex(aset))">
+              Hapus
             </button>
           </td>
         </tr>
       </template>
     </Table>
 
-    <div class="d-flex justify-content-between align-items-center">
-      <div>Menampilkan {{ currentEntries.length }} dari {{ totalEntries }} entri</div>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <div>
+        Menampilkan {{ currentEntries.length }} dari {{ totalEntries }} entri
+      </div>
       <nav>
         <ul class="pagination">
           <li class="page-item" :class="{ disabled: currentPage === 1 }">
-            <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">Previous</a>
+            <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
+              Previous
+            </a>
           </li>
           <li class="page-item" :class="{ active: page === currentPage }" v-for="page in totalPages" :key="page">
-            <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
+            <a class="page-link" href="#" @click.prevent="changePage(page)">
+              {{ page }}
+            </a>
           </li>
           <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-            <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">Next</a>
+            <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
+              Next
+            </a>
           </li>
         </ul>
       </nav>
@@ -82,20 +100,30 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { useAsetStore } from '~/stores/asetStore';
 
 const searchQuery = ref('');
 const entriesToShow = ref(10);
 const currentPage = ref(1);
+const notificationState = ref({ message: '', type: '' });
 
-const assets = ref([
-  { nama: 'Laptop', merek: 'Asus', tipe: 'Vivobook Pro 14x OLED', serialNumber: 'VF7LQLDT' },
-  { nama: 'Handphone', merek: 'Apple', tipe: 'Iphone 13 Pro Max 256 GB', serialNumber: '85309958349058908345908' },
-  { nama: 'Proyektor', merek: 'In Focus', tipe: 'IN112', serialNumber: 'P120Y3K7012' },
-]);
+const asetStore = useAsetStore();
+const assets = computed(() => asetStore.getAssets());
+
+const filteredAssets = computed(() => {
+  if (!searchQuery.value) return assets.value;
+  return assets.value.filter((asset) =>
+    Object.values(asset)
+      .join(' ')
+      .toLowerCase()
+      .includes(searchQuery.value.toLowerCase())
+  );
+});
 
 const totalEntries = computed(() => filteredAssets.value.length);
-const totalPages = computed(() => Math.ceil(totalEntries.value / entriesToShow.value));
+const totalPages = computed(() =>
+  Math.ceil(totalEntries.value / entriesToShow.value)
+);
 
 const currentEntries = computed(() => {
   const start = (currentPage.value - 1) * entriesToShow.value;
@@ -103,24 +131,50 @@ const currentEntries = computed(() => {
   return filteredAssets.value.slice(start, end);
 });
 
-const filteredAssets = computed(() => {
-  if (!searchQuery.value) return assets.value;
-  return assets.value.filter(asset =>
-    Object.values(asset).some(value => value.toLowerCase().includes(searchQuery.value.toLowerCase()))
-  );
-});
-
 const changePage = (page: number) => {
-  if (page < 1 || page > totalPages.value) return;
-  currentPage.value = page;
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
 };
 
-const updateEntries = () => {
+const resetCurrentPage = () => {
   currentPage.value = 1;
 };
 
+const getAssetIndex = (asset: any) => {
+  return assets.value.findIndex(
+    (a) =>
+      a.nama === asset.nama &&
+      a.merek === asset.merek &&
+      a.tipe === asset.tipe &&
+      a.serialNumber === asset.serialNumber
+  );
+};
+
+const confirmDelete = (index: number) => {
+  if (confirm('Apakah Anda yakin ingin menghapus aset ini?')) {
+    asetStore.deleteAsset(index);
+    notificationState.value = {
+      message: 'Aset berhasil dihapus!',
+      type: 'success',
+    };
+    setTimeout(() => {
+      notificationState.value.message = '';
+    }, 1500);
+    if (
+      currentEntries.value.length === 1 &&
+      currentPage.value > 1
+    ) {
+      currentPage.value--;
+    }
+  }
+};
+
+const getStatusGaransi = (akhirGaransi: string) => {
+  const today = new Date();
+  const endWarrantyDate = new Date(akhirGaransi);
+  return endWarrantyDate >= today ? 'Aktif' : 'Kedaluwarsa';
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

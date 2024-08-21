@@ -16,7 +16,7 @@ export default {
     },
   },
 
-  plugins: ["@/plugins/bootstrap.client.ts", "@/plugins/fontawesome.ts"],
+  plugins: ["@/plugins/bootstrap.client.ts", "@/plugins/fontawesome.ts", "@/plugins/pinia.ts"],
 
   runtimeConfig: {
     public: {
