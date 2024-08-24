@@ -4,7 +4,7 @@
       <h1 class="col-sm-2">Aset</h1>
       <div class="col-sm-10 text-end">
         <NuxtLink to="/aset/tambah-aset" class="btn btn-primary text-white">
-          <font-awesome-icon :icon="['fas', 'plus']" class="me-2" /> Tambah
+            Tambah
         </NuxtLink>
       </div>
     </div>
@@ -13,28 +13,10 @@
       {{ notificationState.message }}
     </div>
 
-    <div class="d-flex justify-content-between align-items-center my-3">
-      <div class="d-flex align-items-center">
-        <label for="entries" class="me-2">Tampilkan entri</label>
-        <select id="entries" class="form-select" style="width: auto;" v-model="entriesToShow"
-          @change="resetCurrentPage">
-          <option :value="10">10</option>
-          <option :value="25">25</option>
-          <option :value="50">50</option>
-          <option :value="100">100</option>
-        </select>
-      </div>
-      <div class="row g-2 align-items-center">
-        <div class="col-auto">
-          <label for="search" class="col-form-label">Cari</label>
-        </div>
-        <div class="col-auto">
-          <input type="text" id="search" class="form-control" v-model="searchQuery" @input="resetCurrentPage" />
-        </div>
-      </div>
-    </div>
+    <EntriesSelector v-model:entriesToShow="entriesToShow" v-model:searchQuery="searchQuery"
+      @resetCurrentPage="resetCurrentPage" />
 
-    <Table>
+    <Table :entries="currentEntries" :entriesToShow="entriesToShow" :currentPage="currentPage" @changePage="changePage">
       <template #table-head>
         <tr>
           <th>No.</th>
@@ -70,37 +52,13 @@
         </tr>
       </template>
     </Table>
-
-    <div class="d-flex justify-content-between align-items-center mt-3">
-      <div>
-        Menampilkan {{ currentEntries.length }} dari {{ totalEntries }} entri
-      </div>
-      <nav>
-        <ul class="pagination">
-          <li class="page-item" :class="{ disabled: currentPage === 1 }">
-            <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
-              Previous
-            </a>
-          </li>
-          <li class="page-item" :class="{ active: page === currentPage }" v-for="page in totalPages" :key="page">
-            <a class="page-link" href="#" @click.prevent="changePage(page)">
-              {{ page }}
-            </a>
-          </li>
-          <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-            <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
-              Next
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { useAsetStore } from '~/stores/asetStore';
+import EntriesSelector from '~/components/EntriSelector.vue';
 
 const searchQuery = ref('');
 const entriesToShow = ref(10);

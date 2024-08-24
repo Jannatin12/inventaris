@@ -8,8 +8,8 @@
     </div>
     <hr class="custom-hr">
       <nav class="nav flex-column flex-grow-1">
-      <NuxtLink to="/beranda" class="nav-link d-flex align-items-center"
-                :class="{ active: isActive('/beranda') }">
+      <NuxtLink to="/" class="nav-link d-flex align-items-center"
+                :class="{ active: isActive('/') }">
         <font-awesome-icon :icon="['fas', 'home']" class="me-2" /> Beranda
       </NuxtLink>
       
@@ -39,10 +39,6 @@
         <NuxtLink to="/form-disposisi" class="nav-link d-flex align-items-center ms-4"
                   :class="{ active: isActive('/form-disposisi') }">
           <font-awesome-icon :icon="['fas', 'file-alt']" class="me-2" /> Form Disposisi
-        </NuxtLink>
-        <NuxtLink to="/unggah-bast" class="nav-link d-flex align-items-center ms-4"
-                  :class="{ active: isActive('/unggah-bast') }">
-          <font-awesome-icon :icon="['fas', 'upload']" class="me-2" /> Unggah BAST
         </NuxtLink>
         <NuxtLink to="/rincian-disposisi" class="nav-link d-flex align-items-center ms-4"
                   :class="{ active: isActive('/rincian-disposisi') }">

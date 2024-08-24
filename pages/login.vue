@@ -1,30 +1,24 @@
 <template>
-    <div class="img-fuild">
-        <div class="col-12 position-relative">
-            <img class="img-fluid w-100 header-image" src="https://via.placeholder.com/1200x200" alt="Header Image">
-            <div class="text-overlay">IT INVENTORY</div>
+    <div class="vh-100 d-flex flex-column align-items-center">
+        <div class="header-box w-100 d-flex justify-content-between align-items-center">
+            <h1 class="text-white ms-4">YPT IT Inventory</h1>
+            <img class="logo me-4" src="https://ucarecdn.com/ff27ae2d-daf7-4293-975c-a9647543b529/examplekeithhardy.jpg"
+                alt="Logo">
         </div>
-    </div>
-    <div class="container-fluid mt-4">
-        <div class="row justify-content-center align-items-center">
-            <div class="col-md-4">
-                <div class="card p-4">
-                    <h3 class="card-title text-center mb-4">Silakan Masuk</h3>
-                    <form @submit.prevent="login">
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="nip" v-model="nip"
-                                placeholder="Nomor Induk Pegawai" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" class="form-control" id="password" v-model="password"
-                                placeholder="Kata Sandi" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary text-white mb-3 w-100">Masuk</button>
-                    </form>
-                </div>
-            </div>
-            <div class="col-md-6 text-center">
-                <img src="https://via.placeholder.com/600x400" alt="Gambar (Ilustrasi)" class="img-fluid">
+        <div class="flex-grow-1 d-flex justify-content-center align-items-start w-100 mt-5">
+            <div class="login-box">
+                <h3 class="card-title text-center mb-4">Silakan Masuk</h3>
+                <form @submit.prevent="login">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="nip" v-model="nip" placeholder="Nomor Induk Pegawai"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" id="password" v-model="password"
+                            placeholder="Kata Sandi" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary text-white w-100">Masuk</button>
+                </form>
             </div>
         </div>
     </div>
@@ -33,7 +27,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '~/stores/authStore';
 
+const store = useAuthStore();
 const nip = ref('');
 const password = ref('');
 const router = useRouter();
@@ -43,7 +39,8 @@ const login = () => {
     console.log('Password:', password.value);
 
     if (nip.value === '123' && password.value === '123') {
-        router.push('/beranda');
+        store.login(nip.value, password.value);
+        router.push('/');
     } else {
         alert('NIP atau Password salah!');
     }
@@ -51,48 +48,48 @@ const login = () => {
 </script>
 
 <style scoped>
-.container-fluid {
-    padding: 0;
-}
-
-.header-image {
+.header-box {
+    background-color: #303e63;
     height: 200px;
-    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
-.text-overlay {
-    position: absolute;
-    bottom: 10px;
-    left: 20px;
-    color: white;
-    background-color: transparent;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 48px;
+.header-box h1 {
+    margin: 0;
+    font-size: 36px;
 }
 
-.card {
-    background-color: transparent;
-    border: none;
+.logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.flex-grow-1 {
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-box {
+    background-color: white;
     border-radius: 10px;
-    box-shadow: none;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 400px;
+    width: 100%;
 }
 
 .card-title {
     font-weight: bold;
+    font-size: 18px;
 }
 
 .btn {
     font-size: 16px;
-}
-
-.img-fluid {
-    max-width: 100%;
-    height: auto;
-    object-fit: cover;
-}
-
-.vh-100 {
-    height: 100vh;
 }
 </style>

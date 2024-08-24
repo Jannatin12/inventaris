@@ -4,9 +4,7 @@
             <h2>{{ assetIndex >= 0 ? 'Edit' : 'Tambah' }} Jenis Aset</h2>
         </div>
 
-        <div v-if="notificationState.message" :class="`alert alert-${notificationState.type} mt-3`">
-            {{ notificationState.message }}
-        </div>
+        <Notification :message="notificationState.message" :type="notificationState.type" />
 
         <form @submit.prevent="saveData" class="d-flex flex-column">
             <div class="mb-3 row">

@@ -69,9 +69,6 @@
       </div>
     </form>
 
-    <Table>
-      
-    </Table>
 
   </div>
 </template>

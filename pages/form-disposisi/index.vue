@@ -1,60 +1,126 @@
 <template>
-  <div>
-    <div class="d-flex align-content-start mb-3">
-      <h2>Form Disposisi Aset</h2>
+  <div class="container">
+    <div class="row mb-3">
+      <h1 class="col">Disposisi Aset</h1>
     </div>
 
-    <form @submit.prevent="" class="d-flex flex-column">
-      <div class="mb-3 row">
-        <label for="namaSekolah" class="col-sm-3 col-form-label">Nama Sekolah</label>
-        <div class="col-sm-9">
-          <select id="namaSekolah" class="form-select">
-            <option selected></option>
-            <option value="SMP Telkom Bandung">SMP Telkom Bandung</option>
-            <option value="SMA Telkom Bandung">SMA Telkom Bandung</option>
-            <option value="SMK Telkom Bandung">SMK Telkom Bandung</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="mb-3 row">
-        <label for="namaPengiriman" class="col-sm-3 col-form-label">Nama Pengiriman</label>
-        <div class="col-sm-9">
-          <input type="text" id="namaPengiriman" class="form-control">
-        </div>
-      </div>
-
-      <div class="mb-3 row">
-        <label for="tanggalKirim" class="col-sm-3 col-form-label">Tanggal Pengiriman</label>
-        <div class="col-sm-9">
-          <input type="date" id="tanggalKirim" class="form-control">
-        </div>
-      </div>
-
-      <div class="mb-3 row">
-        <label for="buktiKirim" class="col-sm-3 col-form-label">Bukti Foto</label>
-        <div class="col-sm-9">
-          <input type="file" id="buktiKirim" class="form-control">
-        </div>
-      </div>
-    </form>
-
-    <div class="d-flex justify-content-between my-2">
-      <button type="submit" class="btn btn-danger text-white disabled">
-        <font-awesome-icon :icon="['fas', 'caret-left']" /> Kembali
-      </button>
-      <button type="button" class="btn btn-primary">
-        <NuxtLink to="/form-disposisi/form-konfirmasi" class="btn-back text-white" @click="$emit('save')">
-          <font-awesome-icon :icon="['fas', 'caret-right']" /> Berikutnya
-        </NuxtLink>
-      </button>
+    <div v-if="notificationState.message" :class="`alert alert-${notificationState.type} mt-3`">
+      {{ notificationState.message }}
     </div>
+
+    <div class="button d-flex justify-content-evenly">
+      <NuxtLink to="/form-disposisi/penerimaan-barang" class="btn btn-primary btn-lg text-white">
+        <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />Tambah Penerimaan
+      </NuxtLink>
+      <NuxtLink to="/form-disposisi/pengiriman-barang" class="btn btn-primary btn-lg text-white">
+        <font-awesome-icon :icon="['fas', 'plus']" class="me-2" />Tambah Pengiriman
+      </NuxtLink>
+    </div>
+
+    <EntriesSelector v-model:entriesToShow="entriesToShow" v-model:searchQuery="searchQuery"
+      @resetCurrentPage="resetCurrentPage" />
+
+    <Table :entries="currentEntries" :entriesToShow="entriesToShow" :currentPage="currentPage" @changePage="changePage">
+      <template #table-head>
+        <tr>
+          <th>Jenis Disposisi</th>
+          <th>Asal/Tujuan</th>
+          <th>Tanggal</th>
+          <th>Aksi</th>
+        </tr>
+      </template>
+      <template #table-body>
+        <tr v-for="(disposisi) in currentEntries" :key="disposisi.id">
+          <td>{{ disposisi.jenis }}</td>
+          <td>{{ disposisi.asalTujuan }}</td>
+          <td>{{ disposisi.tanggal }}</td>
+          <td>
+            <button class="button is-small is-danger is-rounded">Hapus</button>
+          </td>
+        </tr>
+      </template>
+    </Table>
   </div>
 </template>
 
-<script lang="ts" setup>
-const formPengiriman = ref([
-])
+<script lang="ts">
+import { defineComponent, ref, computed } from 'vue';
+import { useDisposisiStore } from '@/stores/disposisiStore';
+import EntriesSelector from '~/components/EntriSelector.vue';
+
+interface Disposisi {
+  id: number;
+  jenis: string;
+  asalTujuan: string;
+  tanggal: string;
+}
+
+export default defineComponent({
+  components: {
+    EntriesSelector,
+  },
+  setup() {
+    const disposisiStore = useDisposisiStore();
+    const searchQuery = ref('');
+    const entriesToShow = ref(10);
+    const currentPage = ref(1);
+    const notificationState = ref({ message: '', type: '' });
+
+    const filteredDisposisi = computed(() => {
+      if (!searchQuery.value) return disposisiStore.disposisiList;
+      return disposisiStore.disposisiList.filter((disposisi: Disposisi) =>
+        Object.values(disposisi)
+          .join(' ')
+          .toLowerCase()
+          .includes(searchQuery.value.toLowerCase())
+      );
+    });
+
+    const totalEntries = computed(() => filteredDisposisi.value.length);
+    const totalPages = computed(() =>
+      Math.ceil(totalEntries.value / entriesToShow.value)
+    );
+
+    const currentEntries = computed(() => {
+      const start = (currentPage.value - 1) * entriesToShow.value;
+      const end = start + entriesToShow.value;
+      return filteredDisposisi.value.slice(start, end);
+    });
+
+    const changePage = (page: number) => {
+      if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+      }
+    };
+
+    const resetCurrentPage = () => {
+      currentPage.value = 1;
+    };
+
+    return {
+      disposisiStore,
+      searchQuery,
+      entriesToShow,
+      currentPage,
+      notificationState,
+      filteredDisposisi,
+      totalEntries,
+      totalPages,
+      currentEntries,
+      changePage,
+      resetCurrentPage,
+    };
+  },
+});
 </script>
 
-<style></style>
+<style scoped>
+.container {
+  padding: 20px;
+}
+
+.table {
+  margin-top: 20px;
+  border: 1px solid #ddd;
+}
+</style>

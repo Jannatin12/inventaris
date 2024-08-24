@@ -11,31 +11,12 @@
       </div>
     </div>
 
-    <div v-if="notificationState.message" :class="`alert alert-${notificationState.type} mt-3`">
-      {{ notificationState.message }}
-    </div>
+    <Notification :message="notificationState.message" :type="notificationState.type" />
 
-    <div class="d-flex justify-content-between align-items-center my-3">
-      <div class="d-flex align-items-center">
-        <label for="entries" class="me-2">Tampilkan entri</label>
-        <select id="entries" class="form-select" style="width: auto;" v-model="entriesToShow" @change="resetCurrentPage">
-          <option :value="10">10</option>
-          <option :value="25">25</option>
-          <option :value="50">50</option>
-          <option :value="100">100</option>
-        </select>
-      </div>
-      <div class="row g-2 align-items-center">
-        <div class="col-auto">
-          <label for="search" class="col-form-label">Cari</label>
-        </div>
-        <div class="col-auto">
-          <input type="text" id="search" class="form-control">
-        </div>
-      </div>
-    </div>
+    <EntriesSelector v-model:entriesToShow="entriesToShow" v-model:searchQuery="searchQuery"
+      @resetCurrentPage="resetCurrentPage" />
 
-    <Table>
+    <Table :entries="filteredAssets" :currentPage="currentPage" :entriesToShow="entriesToShow" @changePage="changePage">
       <template #table-head>
         <tr>
           <th>No.</th>
@@ -44,7 +25,7 @@
         </tr>
       </template>
       <template #table-body>
-        <tr v-for="(aset, index) in currentEntries" :key="index">
+        <tr v-for="(aset, index) in filteredAssets" :key="index">
           <td>{{ index + 1 + (currentPage - 1) * entriesToShow }}</td>
           <td>{{ aset.nama }}</td>
           <td>
@@ -58,29 +39,13 @@
         </tr>
       </template>
     </Table>
-
-    <div class="d-flex justify-content-between align-items-center">
-      <div>Menampilkan {{ currentEntries.length }} dari {{ totalEntries }} entri</div>
-      <nav>
-        <ul class="pagination">
-          <li class="page-item" :class="{ disabled: currentPage === 1 }">
-            <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">Previous</a>
-          </li>
-          <li class="page-item" :class="{ active: page === currentPage }" v-for="page in totalPages" :key="page">
-            <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
-          </li>
-          <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-            <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">Next</a>
-          </li>
-        </ul>
-      </nav>
-    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { useTypeAssetStore } from '~/stores/typeAssetStore';
+import EntriesSelector from '~/components/EntriSelector.vue';
 
 const searchQuery = ref('');
 const entriesToShow = ref(10);
@@ -90,15 +55,6 @@ const notificationState = ref({ message: '', type: '' });
 const typeAssetStore = useTypeAssetStore();
 const typeAssets = computed(() => typeAssetStore.getTypeAssets());
 
-const totalEntries = computed(() => filteredAssets.value.length);
-const totalPages = computed(() => Math.ceil(totalEntries.value / entriesToShow.value));
-
-const currentEntries = computed(() => {
-  const start = (currentPage.value - 1) * entriesToShow.value;
-  const end = start + entriesToShow.value;
-  return filteredAssets.value.slice(start, end);
-});
-
 const filteredAssets = computed(() => {
   if (!searchQuery.value) return typeAssets.value;
   return typeAssets.value.filter(asset =>
@@ -107,7 +63,7 @@ const filteredAssets = computed(() => {
 });
 
 const changePage = (page: number) => {
-  if (page >= 1 && page <= totalPages.value) {
+  if (page >= 1 && page <= Math.ceil(filteredAssets.value.length / entriesToShow.value)) {
     currentPage.value = page;
   }
 };

@@ -1,74 +1,141 @@
 <template>
-  <div v-if="isVisible" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header my-2">
-        <button class="back bg-white" @click="close" aria-label="Close">
-          <font-awesome-icon :icon="['fas', 'chevron-left']" />
-        </button>
-        <h4 class="modal-title">{{ title }}</h4>
-      </div>
-      <hr>
-      <div class="modal-body">
-        <slot></slot>
-      </div>
-      <hr>
-      <div class="modal-footer my-2">
-        <button type="button" class="btn btn-danger" @click="close">
-          <font-awesome-icon :icon="['fas', 'times']" /> Kembali
-        </button>
-        <button type="submit" class="btn btn-primary text-white" @click="$emit('save')">
-          <font-awesome-icon :icon="['fas', 'floppy-disk']" /> Simpan
-        </button>
-      </div>
+  <div class="modal" v-if="isOpen">
+    <div class="modal-background" @click="closeModal"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">{{ title }}</p>
+        <button class="delete" aria-label="close" @click="closeModal"></button>
+      </header>
+      <section class="modal-card-body">
+        <form @submit.prevent="submitForm">
+          <div class="field">
+            <label class="label">Asal/Tujuan</label>
+            <div class="control">
+              <input v-model="asalTujuan" class="input" type="text" placeholder="Masukkan asal/tujuan" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Tanggal</label>
+            <div class="control">
+              <input v-model="tanggal" class="input" type="date" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Bukti Foto</label>
+            <div class="control">
+              <input class="input" type="file" accept="image/*" @change="handleFileUpload" />
+            </div>
+          </div>
+
+          <div class="field is-grouped">
+            <div class="control">
+              <button class="button is-success" type="submit">Simpan</button>
+            </div>
+            <div class="control">
+              <button class="button is-light" type="button" @click="closeModal">Batal</button>
+            </div>
+          </div>
+        </form>
+      </section>
     </div>
   </div>
 </template>
 
-<script setup>
-const props = defineProps({
-  isVisible: Boolean,
-  title: String
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
+import { useDisposisiStore } from '@/stores/disposisiStore';
+
+export default defineComponent({
+  props: {
+    isOpen: {
+      type: Boolean,
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+    jenis: {
+      type: String,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
+    const disposisiStore = useDisposisiStore();
+    const asalTujuan = ref('');
+    const tanggal = ref('');
+    const foto = ref<File | null>(null);
+
+    const submitForm = () => {
+      disposisiStore.addDisposisi({
+        jenis: props.jenis,
+        asalTujuan: asalTujuan.value,
+        tanggal: tanggal.value,
+        id: 0,
+      });
+      closeModal();
+    };
+
+    const closeModal = () => {
+      emit('close');
+    };
+
+    const handleFileUpload = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      foto.value = target.files ? target.files[0] : null;
+    };
+
+    return {
+      asalTujuan,
+      tanggal,
+      submitForm,
+      closeModal,
+      handleFileUpload,
+    };
+  },
 });
-
-const emit = defineEmits(['close', 'save']);
-
-const close = () => {
-  emit('close');
-};
 </script>
 
 <style scoped>
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
+.modal {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.modal-content {
-  background: white;
-  padding: 1rem;
+.modal-card {
+  width: 90%;
+  max-width: 600px;
+  border-radius: 8px;
 }
 
-
-.modal-header {
-  display: flex;
-  justify-content: start;
-  align-items: center;
+.modal-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: space-between;
+.modal-card-head {
+  background: #f5f5f5;
+  border-bottom: 1px solid #ddd;
 }
 
-.text-danger {
-  color: red;
+.modal-card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
-.back {
-  margin-right: 15px;
-  outline: none;
-  border: none;
+.field {
+  margin-bottom: 20px;
+}
+
+.button.is-light {
+  background-color: #f5f5f5;
+  color: #333;
 }
 </style>
